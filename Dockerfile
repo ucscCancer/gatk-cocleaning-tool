@@ -14,3 +14,4 @@ RUN unzip picard-tools-1.122.zip
 RUN ln -s picard-tools-1.122 picard
 
 ADD GenomeAnalysisTK.jar /opt/
+ADD indel_realign.py /opt/
