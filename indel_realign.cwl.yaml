@@ -1,0 +1,37 @@
+class: CommandLineTool
+label: GATK Indel Realignment
+requirements:
+  - class: DockerRequirement
+    dockerPull: boysha/gatk:3.4.0
+baseCommand: [/opt/indel_realign.py, --workdir, ./, --mem, 16]
+inputs:
+  - id: "#reads"
+    type: {"type": "array", "items": "File"}
+    inputBinding:
+      prefix: --input_file
+      itemSeparator: null
+  - id: "#reference"
+    type: File
+    inputBinding:
+      prefix: --reference-sequence
+  - id: "#known"
+    type: {"type": "array", "items": "File"}
+    inputBinding:
+      prefix: --known
+      itemSeparator: null
+  - id: "#parallel_realign"
+    type: ["null", "boolean"]
+    inputBinding:
+      prefix: --parallel-realign
+outputs:
+  - id: "#realigned"
+    type: {"type": "File"}
+    outputBinding:
+      glob: "*.realigned.bam"
+arguments:
+  - prefix: --out
+    itemSeparator: null
+    valueFrom:
+      class: Expression
+      engine: "#cwl-js-engine"
+      script: $job.inputs.reads.path.split('/').slice(-1)[0].split('.').slice(0, -1).join('.') + '.realigned.bam'

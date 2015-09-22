@@ -1,0 +1,662 @@
+class: "Workflow"
+steps: 
+  - 
+    id: "#gatk_bqsr_1"
+    run: 
+      inputs: 
+        - 
+          id: "#reference_file"
+          type: 
+            - "null"
+            - "File"
+          label: "reference_file"
+      outputs: 
+        - 
+          id: "#output"
+          label: "output"
+          type: 
+            - "null"
+            - "File"
+          source: 
+            - "#create_seq_dict.output"
+        - 
+          id: "#dictionary"
+          label: "dictionary"
+          type: 
+            - "null"
+            - "File"
+          source: 
+            - "#create_seq_dict.dictionary"
+      class: "Workflow"
+      label: "Index and create dict"
+      dataLinks: 
+        - 
+          source: "#reference_file"
+          destination: "#samtools_faidx.reference_file"
+        - 
+          source: "#samtools_faidx.ref_index_file"
+          destination: "#create_seq_dict.input_reference"
+        - 
+          source: "#create_seq_dict.dictionary"
+          destination: "#dictionary"
+        - 
+          source: "#create_seq_dict.output"
+          destination: "#output"
+      steps: 
+        - 
+          id: "#create_seq_dict"
+          inputs: 
+            - 
+              id: "#create_seq_dict.genome_assembly"
+              source: []
+            - 
+              id: "#create_seq_dict.max_records_in_ram"
+              source: []
+            - 
+              id: "#create_seq_dict.compression_level"
+              source: []
+            - 
+              id: "#create_seq_dict.validation_stringency"
+              source: []
+            - 
+              id: "#create_seq_dict.quiet"
+              source: []
+            - 
+              id: "#create_seq_dict.uri"
+              source: []
+            - 
+              id: "#create_seq_dict.species"
+              source: []
+            - 
+              id: "#create_seq_dict.truncate_names_at_whitespaces"
+              source: []
+            - 
+              id: "#create_seq_dict.num_sequences"
+              source: []
+            - 
+              id: "#create_seq_dict.verbosity"
+              source: []
+            - 
+              id: "#create_seq_dict.input_reference"
+              source: 
+                - "#samtools_faidx.ref_index_file"
+          run: 
+            adapters: []
+            outputs: 
+              - 
+                id: "#dictionary"
+                type: 
+                  - "null"
+                  - "File"
+                outputBinding: 
+                  secondaryFiles: 
+                    - "bai"
+                  glob: 
+                    class: "Expression"
+                    script: "{\n  filename = $job.inputs.input_reference.path.split('/')[$job.inputs.input_reference.path.split('/').length-1]\n\n    return filename.split('.').slice(0, filename.split('.').length-1).concat(\"dict\").join(\".\")\n}\n"
+                    engine: "#cwl-js-engine"
+              - 
+                id: "#output"
+                type: 
+                  - "null"
+                  - "File"
+                outputBinding: 
+                  secondaryFiles: 
+                    - "^.dict"
+                    - ".fai"
+                  glob: 
+                    class: "Expression"
+                    script: "$job.inputs.input_reference.path.split('/')[$job.inputs.input_reference.path.split('/').length-1]"
+                    engine: "#cwl-js-engine"
+            class: "CommandLineTool"
+            name: "Picard-CreateSequenceDictionary"
+            inputs: 
+              - 
+                id: "#genome_assembly"
+                type: 
+                  - "null"
+                  - "string"
+                inputBinding: 
+                  prefix: "GENOME_ASSEMBLY="
+                  position: 6
+                  separate: false
+              - 
+                id: "#max_records_in_ram"
+                type: 
+                  - "null"
+                  - "int"
+                inputBinding: 
+                  prefix: "MAX_RECORDS_IN_RAM="
+                  separate: false
+              - 
+                id: "#compression_level"
+                type: 
+                  - "null"
+                  - "int"
+                inputBinding: 
+                  prefix: "COMPRESSION_LEVEL="
+                  separate: false
+              - 
+                id: "#validation_stringency"
+                type: 
+                  - "null"
+                  - 
+                    name: "validation_stringency"
+                    type: "enum"
+                    symbols: 
+                      - "STRICT"
+                      - "LENIENT"
+                      - "SILENT"
+                inputBinding: 
+                  prefix: "VALIDATION_STRINGENCY="
+                  separate: false
+              - 
+                id: "#quiet"
+                type: 
+                  - "null"
+                  - 
+                    name: "quiet"
+                    type: "enum"
+                    symbols: 
+                      - "True"
+                      - "False"
+                inputBinding: 
+                  prefix: "QUIET="
+                  separate: false
+              - 
+                id: "#uri"
+                type: 
+                  - "null"
+                  - "string"
+                inputBinding: 
+                  prefix: "URI="
+                  position: 7
+                  separate: false
+              - 
+                id: "#species"
+                type: 
+                  - "null"
+                  - "string"
+                inputBinding: 
+                  prefix: "SPECIES="
+                  position: 6
+                  separate: false
+              - 
+                id: "#truncate_names_at_whitespaces"
+                type: 
+                  - "null"
+                  - 
+                    name: "truncate_names_at_whitespaces"
+                    type: "enum"
+                    symbols: 
+                      - "true"
+                      - "false"
+                inputBinding: 
+                  prefix: "TRUNCATE_NAMES_AT_WHITESPACE="
+                  position: 7
+                  separate: false
+              - 
+                id: "#num_sequences"
+                type: 
+                  - "null"
+                  - "int"
+                inputBinding: 
+                  prefix: "NUM_SEQUENCES="
+                  position: 6
+                  separate: false
+              - 
+                id: "#verbosity"
+                type: 
+                  - "null"
+                  - 
+                    name: "verbosity"
+                    type: "enum"
+                    symbols: 
+                      - "ERROR"
+                      - "WARNING"
+                      - "INFO"
+                      - "DEBUG"
+                inputBinding: 
+                  prefix: "VERBOSITY="
+                  position: 7
+                  separate: false
+              - 
+                id: "#input_reference"
+                type: 
+                  - "null"
+                  - "File"
+                inputBinding: 
+                  valueFrom: 
+                    class: "Expression"
+                    script: "$job.inputs.input_reference.path.split('/')[$job.inputs.input_reference.path.split('/').length-1]"
+                    engine: "#cwl-js-engine"
+                  prefix: "R="
+                  position: 1
+                  separate: false
+                label: ""
+            label: "create-seq-dict"
+            baseCommand: 
+              - "java"
+              - "-jar"
+              - "/picard-tools-1.126/picard.jar"
+              - "CreateSequenceDictionary"
+            arguments: 
+              - 
+                valueFrom: 
+                  class: "Expression"
+                  script: "{\n  if ($job.inputs.input_reference)\n  {\n    filename = $job.inputs.input_reference.path.split('/')[$job.inputs.input_reference.path.split('/').length-1]\n    return filename.split('.').slice(0, filename.split('.').length-1).concat(\"dict\").join(\".\")\n  }\n}\n"
+                  engine: "#cwl-js-engine"
+                order: 1
+                prefix: "O="
+                position: 10
+                separate: false
+            requirements: 
+              - 
+                dockerPull: "djordjeklisic/picard_1.126:no_R"
+                dockerImageId: "9b6931a56d30"
+                class: "DockerRequirement"
+              - 
+                requirements: 
+                  - 
+                    dockerPull: "rabix/js-engine"
+                    class: "DockerRequirement"
+                id: "#cwl-js-engine"
+                engineCommand: "cwl-engine.js"
+                class: "ExpressionEngineRequirement"
+              - 
+                fileDef: 
+                  - 
+                    filename: 
+                      class: "Expression"
+                      script: "$job.inputs.input_reference.path.split('/')[$job.inputs.input_reference.path.split('/').length-1]"
+                      engine: "#cwl-js-engine"
+                    fileContent: 
+                      class: "Expression"
+                      script: "$job.inputs.input_reference"
+                      engine: "#cwl-js-engine"
+                  - 
+                    filename: 
+                      class: "Expression"
+                      script: "$job.inputs.input_reference.path.split(\"/\")[$job.inputs.input_reference.path.split(\"/\").length-1] + \".fai\""
+                      engine: "#cwl-js-engine"
+                    fileContent: 
+                      class: "Expression"
+                      script: "$job.inputs.input_reference.secondaryFiles[0]"
+                      engine: "#cwl-js-engine"
+                class: "CreateFileRequirement"
+          outputs: 
+            - 
+              id: "#create_seq_dict.dictionary"
+            - 
+              id: "#create_seq_dict.output"
+        - 
+          id: "#samtools_faidx"
+          inputs: 
+            - 
+              id: "#samtools_faidx.reference_file"
+              source: 
+                - "#reference_file"
+          run: 
+            outputs: 
+              - 
+                id: "#ref_index_file"
+                type: 
+                  - "null"
+                  - "File"
+                outputBinding: 
+                  secondaryFiles: 
+                    - ".fai"
+                  glob: 
+                    class: "Expression"
+                    script: "$job.inputs.reference_file.path.split('/')[$job.inputs.reference_file.path.split('/').length-1]"
+                    engine: "#cwl-js-engine"
+            class: "CommandLineTool"
+            name: "samtools-ref_index"
+            inputs: 
+              - 
+                id: "#reference_file"
+                type: 
+                  - "null"
+                  - "File"
+                inputBinding: 
+                  valueFrom: 
+                    class: "Expression"
+                    script: "$self.path.split(\"/\")[$self.path.split(\"/\").length-1]"
+                    engine: "#cwl-js-engine"
+                  position: 2
+                  separate: true
+                label: "Reference"
+            label: "Samtools Faidx"
+            baseCommand: 
+              - "/opt/samtools-0.1.18/samtools"
+            arguments: 
+              - 
+                valueFrom: "faidx"
+                order: 0
+                prefix: ""
+                separate: true
+            requirements: 
+              - 
+                dockerPull: "draskomilosevic/samtools-0.1.18:v1.0"
+                dockerImageId: "9753eb92c983"
+                class: "DockerRequirement"
+              - 
+                requirements: 
+                  - 
+                    dockerPull: "rabix/js-engine"
+                    class: "DockerRequirement"
+                id: "#cwl-js-engine"
+                engineCommand: "cwl-engine.js"
+                class: "ExpressionEngineRequirement"
+              - 
+                fileDef: 
+                  - 
+                    filename: 
+                      class: "Expression"
+                      script: "$job.inputs.reference_file.path.split(\"/\")[$job.inputs.reference_file.path.split(\"/\").length-1]"
+                      engine: "#cwl-js-engine"
+                    fileContent: 
+                      class: "Expression"
+                      script: "$job.inputs.reference_file"
+                      engine: "#cwl-js-engine"
+                class: "CreateFileRequirement"
+          outputs: 
+            - 
+              id: "#samtools_faidx.ref_index_file"
+    inputs: 
+      - 
+        id: "#gatk_bqsr_1.reference_file"
+    outputs: 
+      - 
+        id: "#gatk_bqsr_1.output"
+      - 
+        id: "#gatk_bqsr_1.dictionary"
+  - 
+    id: "#print_reads"
+    run: 
+      inputs: 
+        - 
+          id: "#reference"
+          type: 
+            - "null"
+            - "File"
+          inputBinding: 
+            prefix: "-R"
+            position: 1
+            separate: true
+          label: "Reference"
+        - 
+          id: "#input_bam"
+          type: 
+            - "null"
+            - "File"
+          inputBinding: 
+            prefix: "-I"
+            position: 3
+            separate: true
+          label: "Input BAM"
+        - 
+          id: "#emit_oq"
+          type: 
+            - "null"
+            - "boolean"
+          inputBinding: 
+            prefix: "--emit_original_quals"
+            position: 2
+            separate: true
+          label: "Emit Original Quality Scores"
+        - 
+          id: "#bqsr"
+          type: 
+            - "null"
+            - "File"
+          inputBinding: 
+            prefix: "-BQSR"
+            position: 5
+            separate: true
+          label: "BQSR"
+      outputs: 
+        - 
+          id: "#output"
+          type: 
+            - "null"
+            - "File"
+          outputBinding: 
+            glob: "output.bam"
+      class: "CommandLineTool"
+      label: "print-reads"
+      baseCommand: 
+        - "java"
+        - "-jar"
+        - "/opt/GenomeAnalysisTK.jar"
+      requirements: 
+        - 
+          dockerPull: "images.sbgenomics.com/sinisa/gatk_bqsr:latest"
+          dockerImageId: "fdd6ea8b4bac"
+          class: "DockerRequirement"
+        - 
+          requirements: 
+            - 
+              dockerPull: "rabix/js-engine"
+              class: "DockerRequirement"
+          id: "#cwl-js-engine"
+          class: "ExpressionEngineRequirement"
+      arguments: 
+        - 
+          valueFrom: "PrintReads"
+          prefix: "-T"
+          separate: true
+        - 
+          valueFrom: 
+            class: "Expression"
+            script: "$job.allocatedResources.cpu"
+            engine: "#cwl-js-engine"
+          prefix: "-nct"
+          position: 4
+          separate: true
+        - 
+          valueFrom: "output.bam"
+          prefix: "-o"
+          position: 6
+          separate: true
+    inputs: 
+      - 
+        id: "#print_reads.reference"
+      - 
+        id: "#print_reads.input_bam"
+      - 
+        id: "#print_reads.emit_oq"
+      - 
+        id: "#print_reads.bqsr"
+    outputs: 
+      - 
+        id: "#print_reads.output"
+  - 
+    id: "#base_recalibrator"
+    run: 
+      inputs: 
+        - 
+          id: "#reference"
+          type: 
+            - "null"
+            - "File"
+          inputBinding: 
+            prefix: "-R"
+            position: 2
+            separate: true
+          label: "Reference"
+        - 
+          id: "#input_bam"
+          type: 
+            - "null"
+            - "File"
+          inputBinding: 
+            prefix: "-I"
+            position: 3
+            separate: true
+          label: "Input BAM"
+        - 
+          id: "#knownSites"
+          type: 
+            - "null"
+            - "File"
+          inputBinding: 
+            prefix: "-knownSites"
+            position: 3
+            separate: true
+          label: "knownSites"
+        - 
+          id: "#bai"
+          label: "Bai"
+          type: 
+            - "null"
+            - "File"
+        - 
+          id: "#fai"
+          label: "Reference index"
+          type: 
+            - "null"
+            - "File"
+      outputs: 
+        - 
+          id: "#output_report"
+          type: 
+            - "File"
+          outputBinding: 
+            glob: "recal_data.table"
+      class: "CommandLineTool"
+      label: "base-recalibrator"
+      baseCommand: 
+        - "java"
+        - "-jar"
+        - "/opt/GenomeAnalysisTK.jar"
+      requirements: 
+        - 
+          dockerPull: "images.sbgenomics.com/sinisa/gatk_bqsr:latest"
+          dockerImageId: "fdd6ea8b4bac"
+          class: "DockerRequirement"
+        - 
+          requirements: 
+            - 
+              dockerPull: "rabix/js-engine"
+              class: "DockerRequirement"
+          id: "#cwl-js-engine"
+          class: "ExpressionEngineRequirement"
+      arguments: 
+        - 
+          valueFrom: "BaseRecalibrator"
+          prefix: "-T"
+          position: 1
+          separate: true
+        - 
+          valueFrom: 
+            class: "Expression"
+            script: "$job.allocatedResources.cpu"
+            engine: "#cwl-js-engine"
+          prefix: "-nct"
+          position: 4
+          separate: true
+        - 
+          valueFrom: "recal_data.table"
+          prefix: "-o"
+          position: 4
+          separate: true
+    inputs: 
+      - 
+        id: "#base_recalibrator.reference"
+      - 
+        id: "#base_recalibrator.input_bam"
+      - 
+        id: "#base_recalibrator.knownSites"
+      - 
+        id: "#base_recalibrator.bai"
+      - 
+        id: "#base_recalibrator.fai"
+    outputs: 
+      - 
+        id: "#base_recalibrator.output_report"
+dataLinks: 
+  - 
+    source: "#gatk_bqsr_1.output"
+    destination: "#print_reads.reference"
+  - 
+    source: "#knownSites"
+    destination: "#base_recalibrator.knownSites"
+  - 
+    source: "#input_bam"
+    destination: "#base_recalibrator.input_bam"
+  - 
+    source: "#gatk_bqsr_1.dictionary"
+    destination: "#dictionary"
+  - 
+    source: "#gatk_bqsr_1.output"
+    destination: "#base_recalibrator.reference"
+  - 
+    source: "#reference_file"
+    destination: "#gatk_bqsr_1.reference_file"
+  - 
+    source: "#gatk_bqsr_1.output"
+    destination: "#reference"
+  - 
+    source: "#input_bam"
+    destination: "#print_reads.input_bam"
+  - 
+    source: "#base_recalibrator.output_report"
+    destination: "#print_reads.bqsr"
+  - 
+    source: "#bai"
+    destination: "#base_recalibrator.bai"
+  - 
+    source: "#print_reads.output"
+    destination: "#output"
+inputs: 
+  - 
+    id: "#reference_file"
+    type: 
+      - "null"
+      - "File"
+    label: "reference_file"
+  - 
+    id: "#knownSites"
+    type: 
+      - "null"
+      - "File"
+    label: "knownSites"
+  - 
+    id: "#input_bam"
+    type: 
+      - "null"
+      - "File"
+    label: "input_bam"
+  - 
+    id: "#bai"
+    type: 
+      - "null"
+      - "File"
+    label: "bai"
+outputs: 
+  - 
+    id: "#output"
+    label: "output"
+    type: 
+      - "null"
+      - "File"
+    source: 
+      - "#print_reads.output"
+  - 
+    id: "#reference"
+    label: "#reference"
+    type: 
+      - "null"
+      - "File"
+    source: 
+      - "#gatk_bqsr_1.output"
+  - 
+    id: "#dictionary"
+    source: 
+      - "#gatk_bqsr_1.dictionary"
+    type: 
+      - "null"
+      - "File"
+    label: "dictionary"
+label: "GATK BQSR"
