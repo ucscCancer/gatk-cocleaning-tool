@@ -31,18 +31,17 @@ def fai_chunk(path, blocksize):
             yield (seq, i, min(i+blocksize-1, l))
 
 
-
 def get_bam_seq(inputBamFile):
-	samtools = which("samtools")
-	cmd = [samtools, "idxstats", inputBamFile]
-	process = subprocess.Popen(args=cmd, stdout=subprocess.PIPE)
-	stdout, stderr = process.communicate()
-	seqs = []
-	for line in stdout.split("\n"):
-		tmp = line.split("\t")
-		if len(tmp) == 4 and tmp[2] != "0":
-			seqs.append(tmp[0])
-	return seqs
+    samtools = which("samtools")
+    cmd = [samtools, "idxstats", inputBamFile]
+    process = subprocess.Popen(args=cmd, stdout=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    seqs = []
+    for line in stdout.split("\n"):
+        tmp = line.split("\t")
+        if len(tmp) == 4 and tmp[2] != "0":
+            seqs.append(tmp[0])
+    return seqs
 
 
 def cmd_caller(cmd):
@@ -180,7 +179,6 @@ ${KNOWN_STR}
     return cmd
 
 
-
 def run_indel_realign(args):
 
     samtools = which("samtools")
@@ -250,11 +248,12 @@ def run_indel_realign(args):
             work_dir=workdir,
             known_vcfs=known_vcfs,
             target_intervals=intervals,
-            mem="%sg" % (args['mem'])
+            mem="%sg" % ('4')
             )
         )
         logging.info("Calling IndelRealigner")
-        rvals = cmds_runner(list(a[0] for a in cmds), args['ncpus'])
+        ncpus = (int(args['mem'])-2)/4
+        rvals = cmds_runner(list(a[0] for a in cmds), ncpus)
         if any( rvals ):
             raise Exception("IndelRealigner failed")
 
@@ -266,7 +265,6 @@ def run_indel_realign(args):
         rvals = cmds_runner(merge_cmds, args['ncpus'])
         if any( rvals ):
             raise Exception("samtools merge failed")
-
     else:
         output_map = os.path.join(workdir, "output.map")
         with open(output_map, "w") as handle:
@@ -286,6 +284,10 @@ def run_indel_realign(args):
         logging.info("Calling IndelRealigner")
         if cmd_caller(cmd) != 0:
             raise Exception("IndelRealigner failed")
+
+    for o in args['out']:
+        logging.info("Indexing bam %s", o)
+        subprocess.check_call([samtools, "index", o])
 
     if not args['no_clean']:
         shutil.rmtree(workdir)
